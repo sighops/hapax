@@ -1,0 +1,158 @@
+VERSION 1 # Currently, this should only be 1.
+
+# Supports all alphanumeric ASCII, and ' ', '_', '-', '+' - can also be NULL
+TRACKNAME REFACE DX
+
+# Can be POLY, DRUM, MPE, or NULL
+TYPE POLY
+
+# Can be A, B, C, D, USBD, USBH, CVGx (x between 1&4), CVx, Gx, or NULL
+OUTPORT NULL
+
+# Can be x (between 1-16), or NULL -- this is ignored if output port is not MIDI
+OUTCHAN NULL
+
+# Can be NONE, ALLACTIVE, A, B, USBH, USBD, CVG, or NULL
+INPORT NULL
+
+# Can be x (between 1-16), ALL, or NULL. This definition will be ignored if INPORT is NONE, ALLACTIVE or CVG
+INCHAN NULL
+
+# DRUMLANES
+# Syntax: ROW:TRIG:CHAN:NOTENUMBER NAME
+# ROW must be between 1 and 8
+# TRIG can be between 0 and 127, or NULL
+# CHAN can be a number between 1 and 16, Gx, CVx, CVGx (x between 1 and 4), or NULL
+# NOTENUMBER can be between 0 and 127, or NULL
+# NAME supports all alphanumeric ASCII, and ' ', '_', '-', '+' - can also be NULL
+# Please note this section will be discarded for tracks which are not DRUM tracks
+[DRUMLANES]
+[/DRUMLANES]
+
+
+# PC
+# Syntax: NUMBER NAME
+# number must be either:
+#   - A number (for simple PC)
+#   - Three numbers, delimited by ':', which represent PC:MSB:LSB. You can put 'NULL' to not set the MSB/LSB.
+# PC must be between 1...128
+# MSB/LSB must be between 0...127
+[PC]
+0 BANK 1-1
+1 BANK 1-2
+2 BANK 1-3
+3 BANK 1-4
+4 BANK 1-5
+5 BANK 1-6
+6 BANK 1-7
+7 BANK 1-8
+8 BANK 2-1
+9 BANK 2-2
+10 BANK 2-3
+11 BANK 2-4
+12 BANK 2-5
+13 BANK 2-6
+14 BANK 2-7
+15 BANK 2-8
+16 BANK 3-1
+17 BANK 3-2
+18 BANK 3-3
+19 BANK 3-4
+20 BANK 3-5
+21 BANK 3-6
+22 BANK 3-7
+23 BANK 3-8
+24 BANK 4-1
+25 BANK 4-2
+26 BANK 4-3
+27 BANK 4-4
+28 BANK 4-5
+29 BANK 4-6
+30 BANK 4-7
+31 BANK 4-8
+[/PC]
+
+[CC]
+1 MOD WHEEL
+7 MAIN VOLUME
+11 EXPRESSION
+64 SUSTAIN SW
+80 ALGO
+85 OP1 LEVEL
+86 OP1 FB LEVEL
+87 OP1 FB TYPE
+88 OP1 FREQ MODE
+89 OP1 RATIO/FREQ COARSE
+90 OP1 RATIO/FREQ FINE
+102 OP1 LEVEL
+103 OP2 FB LEVEL
+104 OP2 FB TYPE
+105 OP2 FREQ MODE
+106 OP2 RATIO/FREQ COARSE
+107 OP2 RATIO/FREQ FINE
+108 OP3 LEVEL
+109 OP3 FB LEVEL
+110 OP3 FB TYPE
+111 OP3 FREQ MODE
+112 OP3 RATIO/FREQ COARSE
+113 OP3 RATIO/FREQ FINE
+114 OP4 LEVEL
+115 OP4 FB
+116 OP4 FB TYPE
+117 OP4 FREQ MODE
+118 OP4 RATIO/FREQ COARSE
+119 OP4 RATIO/FREQ FINE
+120 ALL SOUND OFF
+121 RESET ALL CONTROLS
+123 ALL NOTES OFF
+124 ALL NOTES OFF
+125 ALL NOTES OFF
+126 ALL SOUND OFF
+127 ALL SOUND OFF
+[/CC]
+
+# NRPN
+# Syntax: "MSB:LSB:DEPTH NAME" or "MSB:LSB:DEPTH:DEFAULT=xx NAME"
+# Lsb & msb should be between 0 and 127
+# DEPTH can be 7 or 14
+# For NRPN: DEFAULT_VALUE must be a valid number, either between 0 and 127 (for 7 bit NRPNs) or between 0 and 16383 (for 14bit NRPNs)
+[NRPN]
+[/NRPN]
+
+
+# ASSIGN
+# Syntax: POT_NUMBER TYPE:VALUE or POT_NUMBER TYPE:VALUE DEFAULT=DEFAULT_VALUE
+# POT_NUMBER must be between 1 and 8
+# TYPE can be "CC", "PB" (pitchbend), "AT" (aftertouch), "CV", "NRPN", or "NULL" (this won't assign the pot).
+# Non explicitly-defined pots will be considered "NULL"
+# VALUE VALIDATION
+#### For CC: Value must be a valid number between 0 and 119
+#### For PB and AT, any text after the TYPE will be ignored
+#### For CV, value must be between 1 and 4
+#### For NRPN, value must be MSB:LSB:DEPTH, with both lsb & msb bebtween 0 and 127, and DEPTH being either 7 or 14
+# DEFAULT VALUE
+#### For CC: DEFAULT_VALUE must be a valid number between 0 and 127
+#### For PB: DEFAULT_VALUE must be a valid number between 0 and 16383
+#### For NRPN: DEFAULT_VALUE must be a valid number, either between 0 and 127 (for 7 bit NRPNs) or between 0 and 16383 (for 14bit NRPNs)
+#### For CV: DEFAULT_VALUE must be either a valid number between 0 and 65535, or a voltage between -5V and 5V, e.g. "-4.25V" or "1.7V"
+#### Please note default value will be ignored for PB and AT messages.
+[ASSIGN]
+[/ASSIGN]
+
+
+# AUTOMATION
+# Syntax: TYPE:VALUE
+# TYPE can be "CC", "PB" (pitchbend), "AT" (aftertouch), "CV", or "NRPN"
+# VALUE VALIDATION
+#### For CC: Value must be a valid number between 0 and 119
+#### For PB and AT, any text after the TYPE will be ignored
+#### For CV, value must be between 1 and 4
+#### For NRPN, value must be MSB:LSB:DEPTH, with both lsb & msb bebtween 0 and 127, and DEPTH being either 7 or 14
+[AUTOMATION]
+[/AUTOMATION]
+
+
+# This section will be readable from Hapax.
+[COMMENT]
+YAMAHA REFACE DX
+[/COMMENT]
