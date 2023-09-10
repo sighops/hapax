@@ -55,6 +55,11 @@ def lint_section_close(line):
     if line[-1] != "]":
         raise Exception("Section defintion close must end with ']'")
 
+def is_recognized_section(section):
+    sections = ["ASSIGN","AUTOMATION","CC","COMMENT","DRUMLANES","NRPN","PC"]
+    return section in sections
+
+
 def is_null_or_in_range(part, start, end):
     if part != "NULL":
         try:
@@ -90,18 +95,27 @@ with open(sys.argv[1]) as f:
         line_num += 1
         if line[0] == "[":
             try:
-                print("Found section open",line)
                 lint_section_open(line.strip())
             except Exception as e:
                 msg = "Lint error found on line %s:" % line_num
                 print(msg,e)
                 exit(1)
             section = line.strip("[] \n")
+            if is_recognized_section(section) == False:
+                msg = "Lint error found on line %s:" % line_num
+                print(msg, "Unrecognized section:", section)
+                exit(1)
             for line in f:
                 # We're now on the following line
                 line_num += 1
                 line = line.strip()
                 if line[0] == "[":
+                    if line.strip("[/]") != section:
+                        msg = "Lint error found on line %s: " % line_num
+                        msg += "Section close found for section that was not open. "
+                        msg += "Expected %s " % section + "but found %s" % line.strip("[/]")
+                        print(msg)
+                        exit(1)
                     try:
                         lint_section_close(line)
                     except Exception as e:
@@ -112,10 +126,7 @@ with open(sys.argv[1]) as f:
                 match section:
                     case "DRUMLANES":
                         lint_drumlanes(line)
-                    case _:
-                        msg = "Unrecognized section on line %s:" % line_num
-                        print(msg,section)
-                        exit()
+
 
 
 
