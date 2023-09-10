@@ -2,53 +2,56 @@
 # WORK IN PROGRESS -- DO NOT USE
 #
 
+class HapaxLintException(Exception):
+    pass
+
 import sys
 
 def lint_drumlanes(line):
     parts = split_line_to_parts(line)
     if len(parts) != 5:
-        raise Exception("Syntax error: DRUMLANES must follow the format ROW:TRIG:CHAN:NOTENUMBER NAME")
+        raise HapaxLintException("Syntax error: DRUMLANES must follow the format ROW:TRIG:CHAN:NOTENUMBER NAME")
 
     row = parts[0]
     if is_in_range(row, 1, 8) == False:
-        raise Exception("ROW must be between 1 and 8")
+        raise HapaxLintException("ROW must be between 1 and 8")
 
     trig = parts[1]
     if is_null_or_in_range(trig, 0, 127) == False:
-        raise Exception("TRIG must be between 0 and 127, or NULL")
+        raise HapaxLintException("TRIG must be between 0 and 127, or NULL")
 
     # TODO: CHAN check
 
     note_number = parts[3]
     if is_null_or_in_range(note_number, 0, 127) == False:
-        raise Exception("NOTENUMBER must be between 0 and 127, or NULL")
+        raise HapaxLintException("NOTENUMBER must be between 0 and 127, or NULL")
 
 
 def lint_PC(line):
     parts = split_line_to_parts(line)
     if len(parts) != 2 and len(parts) != 4:
-        raise Exception("Syntax error: PC must follow format NUMBER NAME, OR NUMBER:MSB:LSB NAME")
+        raise HapaxLintException("Syntax error: PC must follow format NUMBER NAME, OR NUMBER:MSB:LSB NAME")
     if is_in_range(parts[0], 1, 128) == False:
-        raise Exception("PC must be a number between 1 and 128")
+        raise HapaxLintException("PC must be a number between 1 and 128")
     if len(parts) > 2:
         if is_in_range(parts[1], 0, 127) == False:
-            raise Exception("MSB must be a number between 0 and 127")
+            raise HapaxLintException("MSB must be a number between 0 and 127")
         if is_in_range(parts[2], 0, 127) == False:
-            raise Exception("LSB must be a number between 0 and 127")
+            raise HapaxLintException("LSB must be a number between 0 and 127")
 
 def lint_CC(line):
     parts = split_line_to_parts(line)
     if len(parts) != 2 and len(parts) != 3:
-        raise Exception("Syntax error: CC must follow format NUMBER NAME, OR NUMBER:DEFAULT=xx NAME")
+        raise HapaxLintException("Syntax error: CC must follow format NUMBER NAME, OR NUMBER:DEFAULT=xx NAME")
     if is_in_range(parts[0], 0, 127) == False:
-        raise Exception("CC must be a number between 0 and 127")
+        raise HapaxLintException("CC must be a number between 0 and 127")
     # Line uses the NUMBER:DEFAULT=xx NAME format
     if len(parts) == 3:
         default, value = parts[1].split("=")
         if default != "DEFAULT":
-            raise Exception("Syntax error: CC must follow format NUMBER NAME, OR NUMBER:DEFAULT=xx NAME")
+            raise HapaxLintException("Syntax error: CC must follow format NUMBER NAME, OR NUMBER:DEFAULT=xx NAME")
         if is_in_range(value, 0, 127) == False:
-            raise Exception("DEFAULT value must be a number between 0 and 127")
+            raise HapaxLintException("DEFAULT value must be a number between 0 and 127")
 
 def lint_NRPN(line):
     parts = split_line_to_parts(line)
@@ -61,19 +64,19 @@ def lint_automation(line):
 
 def lint_section_open(line):
     if line[0] != "[":
-        raise Exception("Section definition must begin with '['")
+        raise HapaxLintException("Section definition must begin with '['")
     if line[1] == "/":
-        raise Exception("Section definition text cannot begin with '/'")
+        raise HapaxLintException("Section definition text cannot begin with '/'")
     if line[-1] != "]":
-        raise Exception("Section defintion must end with ']'")
+        raise HapaxLintException("Section defintion must end with ']'")
 
 def lint_section_close(line):
     if line[0] != "[":
-        raise Exception("Section definition close must begin with '['")
+        raise HapaxLintException("Section definition close must begin with '['")
     if line[1] != "/":
-        raise Exception("Section definition close text must begin with '/'")
+        raise HapaxLintException("Section definition close text must begin with '/'")
     if line[-1] != "]":
-        raise Exception("Section defintion close must end with ']'")
+        raise HapaxLintException("Section defintion close must end with ']'")
 
 def is_recognized_section(section):
     sections = ["ASSIGN","AUTOMATION","CC","COMMENT","DRUMLANES","NRPN","PC"]
@@ -120,7 +123,7 @@ with open(sys.argv[1]) as f:
         if line[0] == "[":
             try:
                 lint_section_open(line.strip())
-            except Exception as e:
+            except HapaxLintException as e:
                 msg = "Lint error found on line %s:" % line_num
                 print(msg,e)
                 exit(1)
@@ -142,7 +145,7 @@ with open(sys.argv[1]) as f:
                         exit(1)
                     try:
                         lint_section_close(line)
-                    except Exception as e:
+                    except HapaxLintException as e:
                         msg = "Lint error found on line %s:" % line_num
                         print(msg,e)
                         exit(1)
