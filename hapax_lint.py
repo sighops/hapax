@@ -55,7 +55,18 @@ def lint_CC(line):
 
 def lint_NRPN(line):
     parts = split_line_to_parts(line)
-
+    length = len(parts)
+    if length != 4 and length != 5:
+        raise HapaxLintException("Syntax error: NRPN must follow format MSB:LSB:DEPTH NAME or MSB:LSB:DEPTH:DEFAULT=xx NAME")
+    if is_in_range(parts[0], 0, 127) == False:
+        raise HapaxLintException("MSB must be a number between 0 and 127")
+    if is_in_range(parts[1], 0, 127) == False:
+        raise HapaxLintException("LSB must be a number between 0 and 127")
+    if depth_is_valid(parts[2]) == False
+        raise HapaxLintException("DEPTH must be a either 7 or 14")
+    if length == 5:
+        if is_in_range(parts[3], 0, 16383) == False
+            raise HapaxLintException("DEPTH must be a either 7 or 14")
 def lint_assign(line):
     return
 
@@ -101,6 +112,9 @@ def is_in_range(part, start, end):
     except:
         return False
     return True
+
+def depth_is_valid(depth):
+    return depth == 7 or depth == 14
 
 def split_line_to_parts(line):
     # TODO: Verify that Hapax parses lines properly when multiples spaces separate parts from NAME
