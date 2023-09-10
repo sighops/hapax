@@ -24,19 +24,28 @@ def lint_drumlanes(line):
         raise Exception("NOTENUMBER must be between 0 and 127, or NULL")
 
 
-def lint_PC():
+def lint_PC(line):
+    parts = split_line_to_parts(line)
+    if len(parts) != 2 and len(parts) != 4:
+        raise Exception("Syntax error: PC must follow format NUMBER NAME, OR NUMBER:MSB:LSB NAME")
+    if is_in_range(parts[0], 1, 128) == False:
+        raise Exception("PC must be a number between 1 and 128")
+    if len(parts) > 2:
+        if is_in_range(parts[1], 0, 127) == False:
+            raise Exception("MSB must be a number between 0 and 127")
+        if is_in_range(parts[2], 0, 127) == False:
+            raise Exception("LSB must be a number between 0 and 127")
+
+def lint_CC(line):
     return
 
-def lint_CC():
+def lint_NRPN(line):
     return
 
-def lint_NRPN():
+def lint_assign(line):
     return
 
-def lint_assign():
-    return
-
-def lint_automation():
+def lint_automation(line):
     return
 
 def lint_section_open(line):
@@ -83,7 +92,8 @@ def split_line_to_parts(line):
     # TODO: Verify that Hapax parses lines properly when multiples spaces separate parts from NAME
     # TODO: Remove inline comments
     parts1 = line.split(":")
-    parts2 = parts1[-1].split()
+    #Split onces to allow names with spaces
+    parts2 = parts1[-1].split(None, 1)
     parts = parts1[0:-1] + parts2
     return parts
 
@@ -93,6 +103,9 @@ with open(sys.argv[1]) as f:
     line_num = 0
     for line in f:
         line_num += 1
+        #Skip if line begins with comment
+        if line[0] == "#":
+            continue
         if line[0] == "[":
             try:
                 lint_section_open(line.strip())
@@ -126,6 +139,16 @@ with open(sys.argv[1]) as f:
                 match section:
                     case "DRUMLANES":
                         lint_drumlanes(line)
+                    case "PC":
+                        lint_PC(line)
+                    case "CC":
+                        lint_CC(line)
+                    case "NRPN":
+                        lint_NRPN(line)
+                    case "ASSIGN":
+                        lint_assign(line)
+                    case "AUTOMATION":
+                        lint_automation(line)
 
 
 
