@@ -37,16 +37,27 @@ def lint_PC(line):
             raise Exception("LSB must be a number between 0 and 127")
 
 def lint_CC(line):
-    return
+    parts = split_line_to_parts(line)
+    if len(parts) != 2 and len(parts) != 3:
+        raise Exception("Syntax error: CC must follow format NUMBER NAME, OR NUMBER:DEFAULT=xx NAME")
+    if is_in_range(parts[0], 0, 127) == False:
+        raise Exception("CC must be a number between 0 and 127")
+    # Line uses the NUMBER:DEFAULT=xx NAME format
+    if len(parts) == 3:
+        default, value = parts[1].split("=")
+        if default != "DEFAULT":
+            raise Exception("Syntax error: CC must follow format NUMBER NAME, OR NUMBER:DEFAULT=xx NAME")
+        if is_in_range(value, 0, 127) == False:
+            raise Exception("DEFAULT value must be a number between 0 and 127")
 
 def lint_NRPN(line):
-    return
+    parts = split_line_to_parts(line)
 
 def lint_assign(line):
     return
 
 def lint_automation(line):
-    return
+    parts = split_line_to_parts(line)
 
 def lint_section_open(line):
     if line[0] != "[":
