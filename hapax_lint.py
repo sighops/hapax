@@ -62,16 +62,34 @@ def lint_NRPN(line):
         raise HapaxLintException("MSB must be a number between 0 and 127")
     if is_in_range(parts[1], 0, 127) == False:
         raise HapaxLintException("LSB must be a number between 0 and 127")
-    if depth_is_valid(parts[2]) == False
+    if depth_is_valid(parts[2]) == False:
         raise HapaxLintException("DEPTH must be a either 7 or 14")
     if length == 5:
-        if is_in_range(parts[3], 0, 16383) == False
+        if is_in_range(parts[3], 0, 16383) == False:
             raise HapaxLintException("DEPTH must be a either 7 or 14")
 def lint_assign(line):
     return
 
 def lint_automation(line):
     parts = split_line_to_parts(line)
+
+def lint_line_for_section(section, line):
+    try:
+        match section:
+            case "DRUMLANES":
+                lint_drumlanes(line)
+            case "PC":
+                lint_PC(line)
+            case "CC":
+                lint_CC(line)
+            case "NRPN":
+                lint_NRPN(line)
+            case "ASSIGN":
+                lint_assign(line)
+            case "AUTOMATION":
+                lint_automation(line)
+    except HapaxLintException as e:
+        return str(e)
 
 def lint_section_open(line):
     if line[0] != "[":
@@ -125,9 +143,9 @@ def split_line_to_parts(line):
     parts = parts1[0:-1] + parts2
     return parts
 
-with open(sys.argv[1]) as f:
+fname = sys.argv[1]
+with open(fname) as f:
     # TODO: check for accurate line_num
-    # TODO: Ignore comment lines
     line_num = 0
     for line in f:
         line_num += 1
@@ -164,24 +182,11 @@ with open(sys.argv[1]) as f:
                         print(msg,e)
                         exit(1)
                     break
-                match section:
-                    case "DRUMLANES":
-                        lint_drumlanes(line)
-                    case "PC":
-                        lint_PC(line)
-                    case "CC":
-                        lint_CC(line)
-                    case "NRPN":
-                        lint_NRPN(line)
-                    case "ASSIGN":
-                        lint_assign(line)
-                    case "AUTOMATION":
-                        lint_automation(line)
-
-
-
-
-
-
-
-
+                lint_err = lint_line_for_section(section, line)
+                if lint_err != None:
+                    msg = "Lint error found on line %s:" % line_num
+                    print(msg, lint_err)
+                    exit(1)
+                
+    print("Finished linting file: %s\nNo lint errors found" % fname)
+    
