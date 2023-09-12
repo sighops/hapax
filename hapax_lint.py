@@ -2,10 +2,11 @@
 # WORK IN PROGRESS -- DO NOT USE
 #
 
+import sys
+import re
+
 class HapaxLintException(Exception):
     pass
-
-import sys
 
 def lint_drumlanes(line):
     parts = split_line_to_parts(line)
@@ -67,7 +68,10 @@ def lint_NRPN(line):
     if length == 5:
         if is_in_range(parts[3], 0, 16383) == False:
             raise HapaxLintException("DEPTH must be a either 7 or 14")
+
 def lint_assign(line):
+    parts = split_assign_line_to_parts(line)
+    print(parts)
     return
 
 def lint_automation(line):
@@ -135,12 +139,25 @@ def depth_is_valid(depth):
     return depth == 7 or depth == 14
 
 def split_line_to_parts(line):
-    # TODO: Verify that Hapax parses lines properly when multiples spaces separate parts from NAME
-    # TODO: Remove inline comments
+    # TODO: Remove inline comments?
     parts1 = line.split(":")
     #Split onces to allow names with spaces
     parts2 = parts1[-1].split(None, 1)
     parts = parts1[0:-1] + parts2
+    return parts
+
+# Because assigns couldn't just follow the same formatting...
+def split_assign_line_to_parts(line):
+    # TODO: Remove inline comments?
+    parts1 = line.split(" ", 1)
+    parts2 = parts1[-1].split(":")
+    if re.search("DEFAULT_VALUE=", parts2[-1]):
+        splits = 2
+    else:
+        splits = 1
+    parts3 = parts2[-1].split(" ", splits)
+    #Split onces to allow names with spaces
+    parts = [parts1[0]] + [parts2[0]] + parts3
     return parts
 
 fname = sys.argv[1]
@@ -189,4 +206,3 @@ with open(fname) as f:
                     exit(1)
                 
     print("Finished linting file: %s\nNo lint errors found" % fname)
-    
