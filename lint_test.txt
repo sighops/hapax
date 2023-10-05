@@ -125,6 +125,9 @@ INCHAN NULL
 #### For CV: DEFAULT_VALUE must be either a valid number between 0 and 65535, or a voltage between -5V and 5V, e.g. "-4.25V" or "1.7V"
 #### Please note default value will be ignored for PB and AT messages.
 [ASSIGN]
+4 CC:34
+2 CC:56 DEFAULT=34
+6 NRPN:55:43:7
 [/ASSIGN]
 
 
