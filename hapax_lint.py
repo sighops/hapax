@@ -12,70 +12,85 @@ class HapaxLinter():
     def __init__(self):
         return
     def lint_drumlanes(self, line):
-        parts = self.split_line_to_parts(line)
-        if len(parts) != 5:
+        dl = re.match(r'(\d+):(\d+|NULL):((\d+)|G(\d)|CV(\d)|CVG(\d)|NULL):(\d+|NULL)\s(.+)', line)
+        if dl == None:
             raise HapaxLintException("Syntax error: DRUMLANES must follow the format ROW:TRIG:CHAN:NOTENUMBER NAME")
-
-        row = parts[0]
-        if self.is_in_range(row, 1, 8) == False:
+        parts = dl.groups()
+        if self.is_in_range(parts[0], 1, 8) == False:
             raise HapaxLintException("ROW must be between 1 and 8")
-
-        trig = parts[1]
-        if self.is_null_or_in_range(trig, 0, 127) == False:
+        if self.is_null_or_in_range(parts[1], 0, 127) == False:
             raise HapaxLintException("TRIG must be between 0 and 127, or NULL")
-
-        # TODO: CHAN check
-
-        note_number = parts[3]
-        if self.is_null_or_in_range(note_number, 0, 127) == False:
+        if parts[3] != None:
+            if self.is_null_or_in_range(parts[3], 1, 16) == False:
+                raise HapaxLintException("CHAN must be between 1 and 16, or NULL")
+        if parts[4] != None:
+            if self.is_null_or_in_range(parts[4], 1, 4) == False:
+                print(parts[4])
+                raise HapaxLintException("CHAN Gx, x must be between 1 and 4, or NULL")
+        if parts[5] != None:
+            if self.is_null_or_in_range(parts[5], 1, 4) == False:
+                raise HapaxLintException("CHAN CVx, x must be between 1 and 4, or NULL")
+        if parts[6] != None:
+            if self.is_null_or_in_range(parts[6], 1, 4) == False:
+                raise HapaxLintException("CHAN CVGx, x must be between 1 and 4, or NULL")
+        if self.is_null_or_in_range(parts[7], 0, 127) == False:
             raise HapaxLintException("NOTENUMBER must be between 0 and 127, or NULL")
+        return True
 
 
     def lint_PC(self, line):
-        parts = self.split_line_to_parts(line)
-        if len(parts) != 2 and len(parts) != 4:
+        pc = re.match(r'(\d+)(:(\d+):(\d+))?\s(.+)', line)
+        if pc == None:
             raise HapaxLintException("Syntax error: PC must follow format NUMBER NAME, OR NUMBER:MSB:LSB NAME")
+        parts = pc.groups()
         if self.is_in_range(parts[0], 1, 128) == False:
             raise HapaxLintException("PC must be a number between 1 and 128")
-        if len(parts) > 2:
-            if self.is_in_range(parts[1], 0, 127) == False:
-                raise HapaxLintException("MSB must be a number between 0 and 127")
+        if parts[2] != None:
             if self.is_in_range(parts[2], 0, 127) == False:
+                raise HapaxLintException("MSB must be a number between 0 and 127")
+            if self.is_in_range(parts[3], 0, 127) == False:
                 raise HapaxLintException("LSB must be a number between 0 and 127")
+        return True
 
     def lint_CC(self, line):
-        parts = self.split_line_to_parts(line)
-        if len(parts) != 2 and len(parts) != 3:
+        cc = re.match(r'(\d+)(:DEFAULT=)?(\d+)?\s(.+)', line)
+        if cc == None:
             raise HapaxLintException("Syntax error: CC must follow format NUMBER NAME, OR NUMBER:DEFAULT=xx NAME")
+        parts = cc.groups()
         if self.is_in_range(parts[0], 0, 127) == False:
             raise HapaxLintException("CC must be a number between 0 and 127")
         # Line uses the NUMBER:DEFAULT=xx NAME format
-        if len(parts) == 3:
-            default, value = parts[1].split("=")
-            if default != "DEFAULT":
+        if parts[2] != None:
+            if parts[1] == None:
                 raise HapaxLintException("Syntax error: CC must follow format NUMBER NAME, OR NUMBER:DEFAULT=xx NAME")
-            if self.is_in_range(value, 0, 127) == False:
+            if self.is_in_range(parts[2], 0, 127) == False:
                 raise HapaxLintException("DEFAULT value must be a number between 0 and 127")
+        return True
 
     def lint_NRPN(self, line):
-        parts = self.split_line_to_parts(line)
-        length = len(parts)
-        if length != 4 and length != 5:
+        nrpn = re.match(r'([0-9]+):([0-9]+):([0-9]+)(:DEFAULT=)?(\d+)?\s(.+)$', line)
+        if nrpn == None:
             raise HapaxLintException("Syntax error: NRPN must follow format MSB:LSB:DEPTH NAME or MSB:LSB:DEPTH:DEFAULT=xx NAME")
+        parts = nrpn.groups()
         if self.is_in_range(parts[0], 0, 127) == False:
             raise HapaxLintException("MSB must be a number between 0 and 127")
         if self.is_in_range(parts[1], 0, 127) == False:
             raise HapaxLintException("LSB must be a number between 0 and 127")
-        if depth_is_valid(parts[2]) == False:
+        if self.depth_is_valid(parts[2]) == False:
             raise HapaxLintException("DEPTH must be a either 7 or 14")
-        if length == 5:
-            if self.is_in_range(parts[3], 0, 16383) == False:
+        if parts[4] != None:
+            if self.is_in_range(parts[4], 0, 16383) == False:
                 raise HapaxLintException("VALUE must be between 0 and 16383")
+        return True
 
     def lint_assign(self, line):
-        assign = re.match(r'([1-8])\s(CC|PB|AT|CV|NRPN|NULL):(\S+)$', line)
+        assign = re.match(r'([1-8])\s(CC|PB|AT|CV|NRPN):(\S+)$', line)
         if assign == None:
-            assign = re.match(r'([1-8])\s(CC|PB|AT|CV|NRPN|NULL):(\S+)\sDEFAULT=(\d+)$', line)
+            assign = re.match(r'([1-8])\s(CC|PB|AT|CV|NRPN):(\S+)\sDEFAULT=(\d+)$', line)
+        if assign == None:
+            assign = re.match(r'([1-8])\s(NULL)$', line)
+            if assign:
+                return True
         if assign == None:
             raise HapaxLintException("Syntax error: Assign must follow format POT_NUMBER(1-8) TYPE:VALUE or POT_NUMBER(1-8) TYPE:VALUE DEFAULT=DEFAULT_VALUE")
         parts = assign.groups()
@@ -86,13 +101,11 @@ class HapaxLinter():
         if length == 4:
             values.append(parts[3])
         print(parts)
-
-
-
+        print(values)
         return
 
     def lint_automation(self, line):
-        parts = split_line_to_parts(line)
+        return
 
     def is_valid_nrpn():
         pass
@@ -105,8 +118,6 @@ class HapaxLinter():
                     return
                 case "NRPN":
                     return
-
-
 
     def lint_line_for_section(self, section, line):
         try:
@@ -154,7 +165,7 @@ class HapaxLinter():
     def is_null_or_in_range(self, part, start, end):
         if part != "NULL":
             try:
-                # Casting throws ValueError if strig cannot convert to base 10
+                # Casting throws ValueError if string cannot convert to base 10
                 if int(part) < start or int(part) > end:
                     return False
             except:
@@ -172,29 +183,7 @@ class HapaxLinter():
         return True
 
     def depth_is_valid(self, depth):
-        return depth == 7 or depth == 14
-
-    def split_line_to_parts(self, line):
-        # TODO: Remove inline comments?
-        parts1 = line.split(":")
-        #Split onces to allow names with spaces
-        parts2 = parts1[-1].split(None, 1)
-        parts = parts1[0:-1] + parts2
-        return parts
-
-    # Because assigns couldn't just follow the same formatting...
-    def split_assign_line_to_parts(self, line):
-        # TODO: Remove inline comments?
-        parts1 = line.split(" ", 1)
-        parts2 = parts1[-1].split(":")
-        if re.search("DEFAULT_VALUE=", parts2[-1]):
-            splits = 2
-        else:
-            splits = 1
-        parts3 = parts2[-1].split(" ", splits)
-        #Split onces to allow names with spaces
-        parts = [parts1[0]] + [parts2[0]] + parts3
-        return parts
+        return int(depth) == 7 or int(depth) == 14
 
 if __name__ == "__main__":
     linter = HapaxLinter()

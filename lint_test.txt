@@ -27,7 +27,10 @@ INCHAN NULL
 # NAME supports all alphanumeric ASCII, and ' ', '_', '-', '+' - can also be NULL
 # Please note this section will be discarded for tracks which are not DRUM tracks
 [DRUMLANES]
-3:45:CHAN:89 NAME WITH SPACES
+3:45:8:89 NAME WITH SPACES
+3:45:G4:89 NAME WITH SPACES
+3:45:CV4:89 NAME WITH SPACES
+3:45:CVG2:89 NAME WITH SPACES
 [/DRUMLANES]
 
 
@@ -105,6 +108,8 @@ INCHAN NULL
 # DEPTH can be 7 or 14
 # For NRPN: DEFAULT_VALUE must be a valid number, either between 0 and 127 (for 7 bit NRPNs) or between 0 and 16383 (for 14bit NRPNs)
 [NRPN]
+23:55:7 Something
+23:55:7:DEFAULT=122 Something Else
 [/NRPN]
 
 
@@ -128,6 +133,7 @@ INCHAN NULL
 4 CC:34
 2 CC:56 DEFAULT=34
 6 NRPN:55:43:7
+8 NULL
 [/ASSIGN]
 
 

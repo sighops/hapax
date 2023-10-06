@@ -22,3 +22,39 @@ def test_depth_is_valid():
     assert result == True
     result = linter.depth_is_valid(5)
     assert result == False
+
+def test_lint_NRPN():
+    line = "23:55:7 Something"
+    result = linter.lint_NRPN(line)
+    assert result == True
+
+    line = "23:55:7:DEFAULT=122 Something Else"
+    result = linter.lint_NRPN(line)
+    assert result == True
+
+def test_lint_CC():
+    line = "1:DEFAULT=64 Modulation Wheel"
+    result = linter.lint_CC(line)
+    assert result == True
+
+    line = "5 PORTAMENTO TIME"
+    result = linter.lint_CC(line)
+    assert result == True
+
+def test_lint_PC():
+    line = "111:1:0 NAME WITH SPACES"
+    result = linter.lint_PC(line)
+    assert result == True
+
+    line = "114 NAME"
+    result = linter.lint_PC(line)
+    assert result == True
+
+def test_lint_drumlanes():
+    line = "3:45:8:89 DRUMLANE 1"
+    result = linter.lint_drumlanes(line)
+    assert result == True
+
+    line = "7:22:CVG1:122 DRUMLANE 2"
+    result = linter.lint_drumlanes(line)
+    assert result == True
