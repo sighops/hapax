@@ -13,6 +13,7 @@ class HapaxLinter():
     def __init__(self, filename):
         self.filename = filename
         return
+
     def lint_drumlanes(self, line):
         dl = re.match(r'(\d+):(\d+|NULL):((\d+)|G(\d)|CV(\d)|CVG(\d)|NULL):(\d+|NULL)\s(.+)', line)
         if dl == None:
@@ -112,7 +113,7 @@ class HapaxLinter():
                 if parts[5] != None:
                     if self.is_in_range(parts[2], 0, 127) == False:
                         raise HapaxLintException("CC DEFAULT value must be a number between 0 and 127")
-            #TODO: Also need to lint CV voltage
+            #TODO: Also need to lint CV voltage, but need examples
             case "CV":
                 if self.is_in_range(parts[2], 1, 4) == False:
                     raise HapaxLintException("CV must be a number between 1 and 4")
@@ -340,7 +341,6 @@ class HapaxLinter():
                             msg = "Lint error found on line %s:" % line_num
                             print(msg, lint_err)
                             exit(1)
-
             print("Finished linting file: %s\nNo lint errors found" % fname)
 
 
