@@ -1,4 +1,4 @@
-# version 0.8
+# version 0.85
 #
 # Linter for Squarp Hapax instrument definition files.
 #
@@ -9,9 +9,14 @@ import re
 class HapaxLintException(Exception):
     pass
 
+class HapaxLintWarning(Exception):
+    pass
+
 class HapaxLinter():
-    def __init__(self, filename):
+    def __init__(self, filename=None, strict=False):
         self.filename = filename
+        self.strict = strict
+        self.has_warnings = False
         return
 
     def lint_drumlanes(self, line):
@@ -58,6 +63,9 @@ class HapaxLinter():
     def lint_CC(self, line):
         cc = re.match(r'(\d+)(:DEFAULT=)?(\d+)?\s(.+)', line)
         if cc == None:
+            cc = re.match(r'(\d+):(\d+)\s(.+)', line)
+            if cc != None:
+                raise HapaxLintWarning("Undocumented syntax used for CC definition.  Expected NUMBER:DEFAULT=xx, but got NUMBER:xx")
             raise HapaxLintException("Syntax error: CC must follow format NUMBER NAME, OR NUMBER:DEFAULT=xx NAME")
         parts = cc.groups()
         if self.is_in_range(parts[0], 0, 127) == False:
@@ -82,8 +90,11 @@ class HapaxLinter():
         return True
 
     def lint_NRPN(self, line):
-        nrpn = re.match(r'([0-9]+):([0-9]+):([0-9]+)(:DEFAULT=)?(\d+)?\s(.+)$', line)
+        nrpn = re.match(r'(\d+):(\d+):(\d+)(:DEFAULT=)?(\d+)?\s(.+)$', line)
         if nrpn == None:
+            nrpn = re.match(r'(\d+):(\d+):(\d+):(\d+)?\s(.+)$', line)
+            if nrpn != None:
+                raise HapaxLintWarning("Undocumented syntax used for NRPN definition.  Expected MSB:LSB:DEPTH:DEFAULT=xx, but got MSB:LSB:DEPTH:xx")
             raise HapaxLintException("Syntax error: NRPN must follow format MSB:LSB:DEPTH NAME or MSB:LSB:DEPTH:DEFAULT=xx NAME")
         parts = nrpn.groups()
         if self.is_in_range(parts[0], 0, 127) == False:
@@ -329,7 +340,13 @@ class HapaxLinter():
                             break
                         try:
                             self.lint_line_for_section(section, line)
-                        except HapaxLintException as e:
+                        except (HapaxLintException, HapaxLintWarning) as e:
+                            if self.strict == False and isinstance(e, HapaxLintWarning):
+                                self.has_warnings = True
+                                warning = str(e)
+                                msg = "WARNING on line %s:" % line_num
+                                print(msg, warning)
+                                continue
                             lint_err = str(e)
                             msg = "Lint error found on line %s:" % line_num
                             print(msg, lint_err)
@@ -344,7 +361,11 @@ class HapaxLinter():
                             msg = "Lint error found on line %s:" % line_num
                             print(msg, lint_err)
                             exit(1)
-            print("Finished linting file: %s\nNo lint errors found" % fname)
+            if self.has_warnings:
+                print("Finished linting file: %s\nFinished with warnings, but no errors found." % fname)
+                print("Lines with warnings are not fully linted. They may work but break in future firmware versions.")
+            else:
+                print("Finished linting file: %s\nNo lint errors found" % fname)
 
 
 if __name__ == "__main__":
