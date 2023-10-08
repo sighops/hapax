@@ -276,6 +276,9 @@ class HapaxLinter():
                 self.lint_inport(line)
             case "INCHAN":
                 self.lint_inchan(line)
+            case "MAXRATE":
+                # TODO: implement this
+                return
 
     def lint(self):
         with open(self.filename) as f:
