@@ -1,11 +1,10 @@
-# version 0.6
+# version 0.8
 #
 # Linter for Squarp Hapax instrument definition files.
 #
 
 import sys
 import re
-import os
 
 class HapaxLintException(Exception):
     pass
@@ -226,6 +225,57 @@ class HapaxLinter():
     def depth_is_valid(self, depth):
         return int(depth) == 7 or int(depth) == 14
 
+    def lint_trackname(self, line):
+        trackname = re.match(r'TRACKNAME [A-z0-9 _\-\+]+$', line)
+        if trackname == None:
+            raise HapaxLintException("Syntax error: TRACKNAME must be in format: 'TRACKNAME NAME', NAME must be alphanumeric ASCII or one of ' ', '_', '-', '+'")
+        return True
+
+    def lint_type(self, line):
+        def_type = re.match(r'TYPE (POLY|DRUM|MPE|NULL)$', line)
+        if def_type == None:
+            raise HapaxLintException("Syntax error: TYPE must be in format: 'TYPE DEF_TYPE', DEF_TYPE must be one of POLY, DRUM, MPE, or NULL")
+        return True
+
+    def lint_outport(self, line):
+        def_type = re.match(r'OUTPORT (A|B|C|D|USBD|USBH|CVG[1-4]|CVX[1-4]|G[1-4]|NULL)$', line)
+        if def_type == None:
+            raise HapaxLintException("Syntax error: OUTPORT must be in format: 'OUTPORT PORT', PORT must be one of A, B, C, D, USBD, USBH, CVGx, CVx, Gx, or NULL(x between 1&4)")
+        return True
+
+    def lint_outchan(self, line):
+        def_type = re.match(r'OUTCHAN ([1-9]|1[0-6]|NULL)$', line)
+        if def_type == None:
+            raise HapaxLintException("Syntax error: OUTCHAN must be in format: 'OUTCHAN CHAN', CHAN must be between 1 and 16 or NULL")
+        return True
+
+    def lint_inport(self, line):
+        def_type = re.match(r'INPORT (NONE|ALLACTIVE|A|B|USBD|USBH|CVG|NULL)$', line)
+        if def_type == None:
+            raise HapaxLintException("Syntax error: TYPE must be in format: 'INPORT PORT', PORT must be one of NONE, ALLACTIVE, A, B, USBH, USBD, CVG, or NULL")
+        return True
+
+    def lint_inchan(self, line):
+        def_type = re.match(r'INCHAN ([1-9]|1[0-6]|ALL|NULL)$', line)
+        if def_type == None:
+            raise HapaxLintException("Syntax error: INCHAN must be in format: 'INCHAN CHAN', CHAN must be between 1 and 16, ALL, or NULL")
+        return True
+
+    def lint_setup(self, setup, line):
+        match setup:
+            case "TRACKNAME":
+                self.lint_trackname(line)
+            case "TYPE":
+                self.lint_type(line)
+            case "OUTPORT":
+                self.lint_outport(line)
+            case "OUTCHAN":
+                self.lint_outchan(line)
+            case "INPORT":
+                self.lint_inport(line)
+            case "INCHAN":
+                self.lint_inchan(line)
+
     def lint(self):
         with open(self.filename) as f:
             line_num = 0
@@ -276,6 +326,16 @@ class HapaxLinter():
                         try:
                             self.lint_line_for_section(section, line)
                         except HapaxLintException as e:
+                            lint_err = str(e)
+                            msg = "Lint error found on line %s:" % line_num
+                            print(msg, lint_err)
+                            exit(1)
+                setup = re.match(r'^(\w+)\s', line)
+                if setup != None:
+                    setup = setup.groups()[0]
+                    try:
+                        self.lint_setup(setup, line.strip())
+                    except HapaxLintException as e:
                             lint_err = str(e)
                             msg = "Lint error found on line %s:" % line_num
                             print(msg, lint_err)
