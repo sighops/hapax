@@ -1,4 +1,4 @@
-# version 0.86
+# version 0.9
 #
 # Linter for Squarp Hapax instrument definition files.
 #
@@ -109,7 +109,7 @@ class HapaxInstrumentLinter():
         return True
 
     def lint_assign(self, line):
-        assign = re.match(r'([1-8])\s(CC|CV|PB|NRPN):(\d+)(?::(\d+):(\d+))?\s?(?:DEFAULT=(\d+))?', line)
+        assign = re.match(r'([1-8])\s(CC|CV|PB|NRPN):(\d+)(?::(\d+):(\d+))?\s?(?:DEFAULT=(\d+|[\-0-9.]+V))?', line)
         if assign == None:
             assign = re.match(r'([1-8])\s(PB|AT|NULL)$', line)
             if assign:
@@ -117,6 +117,7 @@ class HapaxInstrumentLinter():
         if assign == None:
             raise HapaxLintException("Syntax error: Assign must follow format POT_NUMBER(1-8) TYPE:VALUE or POT_NUMBER(1-8) TYPE:VALUE DEFAULT=DEFAULT_VALUE")
         parts = assign.groups()
+        print(parts)
         match parts[1]:
             case "CC":
                 if self.is_in_range(parts[2], 0, 119) == False:
@@ -124,13 +125,15 @@ class HapaxInstrumentLinter():
                 if parts[5] != None:
                     if self.is_in_range(parts[2], 0, 127) == False:
                         raise HapaxLintException("CC DEFAULT value must be a number between 0 and 127")
-            #TODO: Also need to lint CV voltage, but need examples
             case "CV":
                 if self.is_in_range(parts[2], 1, 4) == False:
                     raise HapaxLintException("CV must be a number between 1 and 4")
                 if parts[5] != None:
-                    if self.is_in_range(parts[5], 0, 65535) == False:
-                        raise HapaxLintException("CC DEFAULT value must be a number between 0 and 65535")
+                    if "V" in parts[5]:
+                        if self.is_valid_voltage(parts[5].strip("V")) == False:
+                            raise HapaxLintException("CV DEFAULT Voltage must be a number between -5 and 5")
+                    elif self.is_in_range(parts[5], 0, 65535) == False:
+                        raise HapaxLintException("CV DEFAULT value must be a number between 0 and 65535")
             case "NRPN":
                 if self.is_in_range(parts[2], 0, 127) == False:
                     raise HapaxLintException("MSB must be a number between 0 and 127")
@@ -236,6 +239,14 @@ class HapaxInstrumentLinter():
 
     def depth_is_valid(self, depth):
         return int(depth) == 7 or int(depth) == 14
+
+    def is_valid_voltage(self, voltage):
+        try:
+            if float(voltage) < -5 or float(voltage) > 5:
+                return False
+        except:
+            return False
+        return True
 
     def lint_trackname(self, line):
         trackname = re.match(r'TRACKNAME [A-z0-9 _\-\+]+$', line)
