@@ -18,6 +18,10 @@ INPORT NULL
 # Can be x (between 1-16), ALL, or NULL. This definition will be ignored if INPORT is NONE, ALLACTIVE or CVG
 INCHAN NULL
 
+# This defines the default 'MAX RATE' for automation lanes.
+# Can be NULL, 192, 96, 64, 48, 32, 24, 16, 12, 8, 6, 4, 3, 2, 1
+MAXRATE NULL
+
 # DRUMLANES
 # Syntax: ROW:TRIG:CHAN:NOTENUMBER NAME
 # ROW must be between 1 and 8

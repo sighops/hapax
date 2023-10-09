@@ -1,4 +1,4 @@
-# version 0.85
+# version 0.86
 #
 # Linter for Squarp Hapax instrument definition files.
 #
@@ -12,7 +12,7 @@ class HapaxLintException(Exception):
 class HapaxLintWarning(Exception):
     pass
 
-class HapaxLinter():
+class HapaxInstrumentLinter():
     def __init__(self, filename=None, strict=False):
         self.filename = filename
         self.strict = strict
@@ -273,6 +273,11 @@ class HapaxLinter():
             raise HapaxLintException("Syntax error: INCHAN must be in format: 'INCHAN CHAN', CHAN must be between 1 and 16, ALL, or NULL")
         return True
 
+    def lint_maxrate(self, line):
+        maxrate = re.match(r'MAXRATE (NULL|192|96|64|48|32|24|16|12|8|6|4|3|2|1)$', line)
+        if maxrate == None:
+            raise HapaxLintException("Syntax error: MAXRATE must be in format: 'MAXRATE RATE', RATE must be be one of NULL, 192, 96, 64, 48, 32, 24, 16, 12, 8, 6, 4, 3, 2, 1")
+
     def lint_setup(self, setup, line):
         match setup:
             case "TRACKNAME":
@@ -288,8 +293,7 @@ class HapaxLinter():
             case "INCHAN":
                 self.lint_inchan(line)
             case "MAXRATE":
-                # TODO: implement this
-                return
+                self.lint_maxrate(line)
 
     def lint(self):
         with open(self.filename) as f:
@@ -369,6 +373,8 @@ class HapaxLinter():
 
 
 if __name__ == "__main__":
+    if not sys.version_info >= (3, 10):
+        print("FAIL: Python version 3.10 or greater is required.")
     fname = sys.argv[1]
-    linter = HapaxLinter(fname)
+    linter = HapaxInstrumentLinter(fname)
     linter.lint()
