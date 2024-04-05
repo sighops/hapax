@@ -22,4 +22,7 @@ jobs:
         pip install pylint
     - name: Analysing the code with pylint
       run: |
-        FILES=`git diff --name-only remotes/origin/main HEAD '*.py'` if [ $FILES ]; then pylint $FILES fi
+        FILES=`git diff --name-only remotes/origin/main HEAD '*.py'`
+        if [ $FILES ]; then
+          pylint $FILES
+        fi
