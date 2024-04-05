@@ -10,6 +10,8 @@ jobs:
         python-version: ["3.10"]
     steps:
     - uses: actions/checkout@v3
+      with:
+        fetch-depth: '0'
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v3
       with:
@@ -20,4 +22,7 @@ jobs:
         pip install pylint
     - name: Analysing the code with pylint
       run: |
-        pylint $(git diff --name-only $GITHUB_BASE_REF $GITHUB_HEAD_REF '*.py')
+        FILES=`git diff --name-only remotes/origin/main HEAD '*.py'`
+        if [ $FILES ]; then
+          pylint $FILES
+        fi
