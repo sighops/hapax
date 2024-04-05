@@ -6,7 +6,6 @@ TRACKNAME JX-08
 # Can be POLY, DRUM, MPE, or NULL
 TYPE POLY
 
-# new comment
 # Can be A, B, C, D, USBD, USBH, CVGx (x between 1&4), CVx, Gx, or NULL
 OUTPORT NULL
 
