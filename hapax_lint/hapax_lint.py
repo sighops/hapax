@@ -376,7 +376,6 @@ class HapaxInstrumentLinter():
                             msg = "Lint error found on line %s:" % line_num
                             print(msg, lint_err)
                             exit(1)
-                            bad line
             if self.has_warnings:
                 print("Finished linting file: %s\nFinished with warnings, but no errors found." % fname)
                 print("Lines with warnings are not fully linted. They may work but break in future firmware versions.")
