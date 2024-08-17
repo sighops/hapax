@@ -50,7 +50,6 @@ MAXRATE NULL
 111:1:0 NAME WITH SPACES
 [/PC]
 
-
 # CC
 # Syntax: CC_NUMBER NAME or CC_NUMBER:DEFAULT=xx NAME
 # DEFAULT_VALUE must be a valid number between 0 and 127

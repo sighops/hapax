@@ -309,77 +309,54 @@ class HapaxInstrumentLinter():
 
     def lint(self):
         with open(self.filename) as f:
-            line_num = 0
-            for line in f:
-                line_num += 1
-                #Skip if line begins with comment
-                if line[0] == "#":
-                    continue
-                if line[0] == "[":
-                    try:
+            try:
+                line_num = 0
+                for line in f:
+                    line_num += 1
+                    #Skip if line begins with comment
+                    if line[0] == "#":
+                        continue
+                    if line[0] == "[":
                         self._lint_section_open(line.strip())
-                    except HapaxLintException as e:
-                        msg = f"Lint error found on line {line_num}:"
-                        print(msg,e)
-                        sys.exit(1)
-                    section = re.match(r'\[(.*)\]', line).groups()[0]
-                    for line in f:
-                        # We're now on the following line
-                        line_num += 1
-                        line = line.strip()
-                        # Skip blank line
-                        if len(line) == 0:
-                            continue
-                        # Skip comment
-                        if line[0] == "#":
-                            continue
-                        # Removes inline comments
-                        line = line.split("#")[0]
-                        if line[0] == "[":
-                            if line[1] != "/" and line.strip("[]") != section:
-                                msg = f"Lint error found on line {line_num}: "
-                                msg += f"New section {line.strip("[/]")} opened before closing open section {section}"
-                                print(msg)
-                                sys.exit(1)
-                            if line.strip("[/]") != section:
-                                msg = f"Lint error found on line {line_num}: "
-                                msg += "Section close found for section that was not open. "
-                                msg += f"Expected {section} but found {line.strip("[/]")}"
-                                print(msg)
-                                sys.exit(1)
-                            try:
-                                self._lint_section_close(line)
-                            except HapaxLintException as e:
-                                msg = f"Lint error found on line {line_num}:"
-                                print(msg,e)
-                                sys.exit(1)
-                            break
-                        try:
-                            self._lint_line_for_section(section, line)
-                        except (HapaxLintException, HapaxLintWarning) as e:
-                            if self.strict is False and isinstance(e, HapaxLintWarning):
-                                self.has_warnings = True
-                                warning = str(e)
-                                msg = f"WARNING on line {line_num}:"
-                                print(msg, warning)
+                        section = re.match(r'\[(.*)\]', line).groups()[0]
+                        for line in f:
+                            # We're now on the following line
+                            line_num += 1
+                            line = line.strip()
+                            # Skip blank line
+                            if len(line) == 0:
                                 continue
-                            lint_err = str(e)
-                            msg = f"Lint error found on line {line_num}:"
-                            print(msg, lint_err)
-                            sys.exit(1)
-                setup = re.match(r'^(\w+)\s', line)
-                if setup is not None:
-                    setup = setup.groups()[0]
-                    try:
+                            # Skip comment lines
+                            if line[0] == "#":
+                                continue
+                            # Removes inline comments
+                            line = line.split("#")[0]
+                            if line[0] == "[":
+                                if line[1] != "/":
+                                    raise HapaxLintException(f'New {line.strip("[/]")} section opened before closing open {section} section')
+                                if line.strip("[/]") != section:
+                                    raise HapaxLintException(f'Section close found for section that was not open. Expected {section} but found {line.strip("[/]")}')
+                                self._lint_section_close(line)
+                                break
+                            self._lint_line_for_section(section, line)
+
+                    setup = re.match(r'^(\w+)\s', line)
+                    if setup is not None:
+                        setup = setup.groups()[0]
                         self.lint_setup(setup, line.strip())
-                    except HapaxLintException as e:
-                        lint_err = str(e)
-                        msg = f"Lint error found on line {line_num}:"
-                        print(msg, lint_err)
-                        sys.exit(1)
+            except (HapaxLintException, HapaxLintWarning) as e:
+                if self.strict is False and isinstance(e, HapaxLintWarning):
+                    self.has_warnings = True
+                    warning = str(e)
+                    msg = f"WARNING on line {line_num}:"
+                    print(msg, warning)
+                lint_err = str(e)
+                msg = f"Error found on line {line_num}:"
+                print(msg, lint_err, f"\nLine {line_num}: {line}")
+                sys.exit(1)
             if self.has_warnings:
                 print(f"Finished linting file: {self.filename}\nFinished with warnings, but no errors found.")
-                print("Lines with warnings are not fully linted. They may work but break in future firmware versions.")
+                print("Lines with warnings may work but don't follow documented standards and may break in future firmware versions.")
             else:
                 print(f"Finished linting file: {self.filename}\nNo lint errors found")
 
