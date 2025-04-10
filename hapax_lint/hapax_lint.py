@@ -344,12 +344,13 @@ class HapaxInstrumentLinter():
                     if setup is not None:
                         setup = setup.groups()[0]
                         self.lint_setup(setup, line.strip())
-            except (HapaxLintException, HapaxLintWarning) as e:
-                if self.strict is False and isinstance(e, HapaxLintWarning):
+            except HapaxLintWarning as e:
+                if self.strict is True:
                     self.has_warnings = True
                     warning = str(e)
                     msg = f"WARNING on line {line_num}:"
                     print(msg, warning)
+            except HapaxLintException as e:
                 lint_err = str(e)
                 msg = f"Error found on line {line_num}:"
                 print(msg, lint_err, f"\nLine {line_num}: {line}")
