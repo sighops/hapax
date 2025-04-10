@@ -1,7 +1,7 @@
 VERSION 1 # Currently, this should only be 1.
 
 # Supports all alphanumeric ASCII, and ' ', '_', '-', '+' - can also be NULL
-TRACKNAME REFACE DX
+TRACKNAME Grandmother
 
 # Can be POLY, DRUM, MPE, or NULL
 TYPE POLY
@@ -40,44 +40,44 @@ INCHAN NULL
 [PC]
 [/PC]
 
+
+# CC
+# Syntax: CC_NUMBER NAME or CC_NUMBER:DEFAULT=xx NAME
+# DEFAULT_VALUE must be a valid number between 0 and 127
 [CC]
-1 MOD WHEEL
-7 MAIN VOLUME
-11 EXPRESSION
-64 SUSTAIN SW
-80 ALGO
-85 OP1 LEVEL
-86 OP1 FB LEVEL
-87 OP1 FB TYPE
-88 OP1 FREQ MODE
-89 OP1 RATIO/FREQ COARSE
-90 OP1 RATIO/FREQ FINE
-102 OP1 LEVEL
-103 OP2 FB LEVEL
-104 OP2 FB TYPE
-105 OP2 FREQ MODE
-106 OP2 RATIO/FREQ COARSE
-107 OP2 RATIO/FREQ FINE
-108 OP3 LEVEL
-109 OP3 FB LEVEL
-110 OP3 FB TYPE
-111 OP3 FREQ MODE
-112 OP3 RATIO/FREQ COARSE
-113 OP3 RATIO/FREQ FINE
-114 OP4 LEVEL
-115 OP4 FB
-116 OP4 FB TYPE
-117 OP4 FREQ MODE
-118 OP4 RATIO/FREQ COARSE
-119 OP4 RATIO/FREQ FINE
-120 ALL SOUND OFF
-121 RESET ALL CONTROLS
-123 ALL NOTES OFF
-124 ALL NOTES OFF
-125 ALL NOTES OFF
-126 ALL SOUND OFF
-127 ALL SOUND OFF
+
+1:0 Mod Wheel
+3:0 Mod Rate
+65:0 Glide On/Off
+5:0 Glide Time
+85:0 Glide Type
+103:64 Gated Glide On/Off
+94:0 Legato Glide
+
+
+12:0 Osc 2 Freq
+74:64 Osc 1 Octave
+75:64 Osc 2 Octave
+77:0 Osc 2 Sync On/Off
+
+
+8:0 Arp Rate
+73:0 Arp Play On/Off
+69:0 Arp Hold On/Off
+90:0 Arp/ Seq Clock Division
+91:0 Arp Mode
+92:0 Arp Pattern
+93:0 Arp Range/ SEQ Number
+
+89:51 Keyboard Octave
+107:0 Pitch Bend Up Amount
+108:0 Pitch Bend Down Amount
+119:61 KB Transpose (Semitones)
+
+64:0 Sustain Pedal On/Off
+120:0 All Sounds Off
 [/CC]
+
 
 # NRPN
 # Syntax: "MSB:LSB:DEPTH NAME" or "MSB:LSB:DEPTH:DEFAULT=xx NAME"
@@ -122,5 +122,5 @@ INCHAN NULL
 
 # This section will be readable from Hapax.
 [COMMENT]
-YAMAHA REFACE DX
+Template for Moog Grandmother
 [/COMMENT]
