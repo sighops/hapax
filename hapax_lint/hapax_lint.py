@@ -120,7 +120,7 @@ class HapaxInstrumentLinter():
                 if self._is_in_range(parts[2], 0, 119) is False:
                     raise HapaxLintException("CC must be a number between 0 and 119")
                 if parts[5] is not None:
-                    if self._is_in_range(parts[2], 0, 127) is False:
+                    if self._is_in_range(parts[5], 0, 127) is False:
                         raise HapaxLintException("CC DEFAULT value must be a number between 0 and 127")
             case "CV":
                 if self._is_in_range(parts[2], 1, 4) is False:
@@ -141,7 +141,7 @@ class HapaxInstrumentLinter():
                 if parts[5] is not None:
                     if self._is_in_range(parts[5], 0, 65535) is False:
                         raise HapaxLintException("NRPN DEFAULT value must be a number between 0 and 65535")
-            #TODO: Implement this?  Docs say everything after PB type is ignored but also says you can define a
+            # Should this be implemented?  Docs say everything after PB type is ignored but also says you can define a
             # default value.  WHICH IS IT?
             case "PB":
                 pass
