@@ -1,6 +1,6 @@
-from hapax_lint import HapaxInstrumentLinter, HapaxLintException, HapaxLintWarning
+import hapaxlint
 
-linter = HapaxInstrumentLinter()
+linter = hapaxlint.HapaxInstrumentLinter()
 
 def test_is_in_range_true():
     result = linter._is_in_range(55, 1, 100)
