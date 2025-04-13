@@ -1,0 +1,2 @@
+CC_DEFAULT = "Undocumented syntax used for CC definition.  Expected NUMBER:DEFAULT=xx, but got NUMBER:xx"
+NRPN_DEFAULT = "Undocumented syntax used for NRPN definition.  Expected MSB:LSB:DEPTH:DEFAULT=xx, but got MSB:LSB:DEPTH:xx"
